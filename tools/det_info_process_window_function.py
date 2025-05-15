@@ -1,9 +1,8 @@
 from pyflink.datastream.functions import ProcessWindowFunction
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Iterable, TypeVar
 
 T = TypeVar('T')
-
 
 class DetInfoProcessWindowFunction(ProcessWindowFunction[T, str, str, object]):
 
@@ -17,8 +16,9 @@ class DetInfoProcessWindowFunction(ProcessWindowFunction[T, str, str, object]):
         values = ", ".join(str(e) for e in elements)
 
         # Konwersja milisekund na daty
-        start = datetime.fromtimestamp(context.window().start / 1000, tz=timezone.utc).date()
-        end = datetime.fromtimestamp(context.window().end / 1000, tz=timezone.utc).date()
+        epoch = datetime(1970, 1, 1)
+        start = epoch + timedelta(milliseconds=context.window().start)
+        end = epoch + timedelta(milliseconds=context.window().end)
 
         # Zwróć pojedynczy wynik
         yield f"Window: {start}-{end}; Key: {key} values: {values}"
